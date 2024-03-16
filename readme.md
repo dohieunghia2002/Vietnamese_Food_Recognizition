@@ -6,7 +6,7 @@ Cụ thể, trong bài toán này, một hệ thống phải nhận diện và v
 
 Project này sẽ xây dựng một mô hình máy học có khả năng nhận dạng được các thành phần nguyên liệu xuất hiện trong hình ảnh của món ăn. Từ danh sách các nguyên liệu được nhận dạng có thể đưa ra dự đoán món ăn trong ảnh là món gì.
 
-**Link dataset:** 
+**Link dataset:** https://mega.nz/folder/Ne81mCqR#2fcJjE-sN-zVud0ssOAAdA
 
 ## YOLO:
 YOLO, viết tắt của "You Only Look Once", là một trong những mô hình quan trọng và phổ biến trong lĩnh vực object detection. YOLO tiêu biểu cho sự tiến bộ của deep learning trong việc giải quyết bài toán object detection một cách hiệu quả và nhanh chóng.
