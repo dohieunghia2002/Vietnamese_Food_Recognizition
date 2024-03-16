@@ -26,15 +26,7 @@ with open(classes_path, 'r', encoding='utf-8') as file:
 with open(ingredients_path, 'r', encoding='utf-8') as f:
     ingredients = f.read().splitlines()
 
-columns = ['Score1', 'Score2', 'Sum', 'Matches']
-
-df_results = pd.DataFrame(columns=columns)
-
-df_results['Score1'] = df_results['Score1'].astype(float)
-df_results['Score2'] = df_results['Score2'].astype(float)
-df_results['Sum'] = df_results['Sum'].astype(float)
-df_results['Matches'] = df_results['Matches'].astype(int)
-compact_df = df.drop(df.columns[[0, 2, 4, -1]], axis=1)
+compact_df = df.drop(df.columns[[0, -1]], axis=1)
 
 CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
@@ -49,10 +41,14 @@ def show_img(img):
 
 def find_class(set_detected_ingre):
     global compact_df
-    global df_results
+
+    distances = []
+    size_ingre = []
+    matches = []
 
     for index, row in compact_df.iterrows():
-        df_results.loc[index, "Matches"] = 0
+        distance = 0
+        size = 0
         for column, value in row.items():
             if pd.notna(value):
                 name_without_accents = unidecode(value)
@@ -61,59 +57,53 @@ def find_class(set_detected_ingre):
                     values[i] = values[i].replace(' ', '-')
 
                 values = set(values)
-                values_same = values.intersection(set_detected_ingre)
-                values_no_match = values - set_detected_ingre
+                size = len(values)
+                values_match = values.intersection(set_detected_ingre)
+                # values_no_match = values - set_detected_ingre
                 # values_redundant = set_detected_ingre - values
-                score = 100 - ((len(values_same) * df.loc[index, "Ingre_Score"]) - (len(values_no_match) * df.loc[index, "Ingre_Score"]))
-                df_results.loc[index, "Matches"] = df_results.loc[index, "Matches"] + len(values_same)
 
                 if column == "Ingredients":
-                    df_results.loc[index, "Score1"] = score
+                    for element in set_detected_ingre:
+                        if element in values:
+                            distance = distance + 0
+                        else:
+                            distance = distance + 1
                 else:
-                    df_results.loc[index, "Score2"] = len(values_same) * df.loc[index, "Second_Ingre_Score"]
+                    for element in set_detected_ingre:
+                        if element in values:
+                            distance = distance + 0.5
+        distances.append(distance)
+        size_ingre.append(size)
+        matches.append(len(values_match))
 
-            else:
-                df_results.loc[index, "Score2"] = 0
-    
-    df_results["Matches"] = df_results["Matches"].astype(int)
-    
-    for index, row in df_results.iterrows():
-        score_main = row['Score1']
-        score_extra = row['Score2']
+    # print("New element:", set_detected_ingre)
+    # print(distances, len(distances))
+    # print(size_ingre, len(size_ingre))
+    # print(matches, len(matches))
+    min_value = min(distances)
+    smallest_values_list = [index for index, elem in enumerate(distances) if elem == min_value]
 
-        if score_main != 0:
-            sum = round(score_main - score_extra, 2)
-        else:
-            sum = score_main
+    minus = []
+    for index in smallest_values_list:
+        subtraction = abs(size_ingre[index] - matches[index])
+        minus.append(subtraction)
 
-        df_results.at[index, 'Sum'] = float(sum)
-    
-    first_column = df['Food']
-    df_results = pd.concat([first_column, df_results], axis=1)
+    # print(minus)
+    minus_min = min(minus)
+    min_index = minus.index(minus_min)
+    min_index = smallest_values_list[min_index]
+    # print("Predicted Food: " + df.loc[min_index, "Food"] + " - Đặc sản " + str(df.loc[min_index, "Province"]))
 
-    min_sum_value = df_results['Sum'].min()
-    min_sum_rows = df_results[df_results['Sum'] == min_sum_value]
-    max_matches_index = min_sum_rows['Matches'].idxmax()
-
-    df_sorted = df_results.sort_values(by='Sum')
-    four_rows_with_min = df_sorted.head(4)
-    indexes = []
+    sorted_indices = sorted(range(len(distances)), key=lambda i: distances[i])[:4]
+    sorted_indices.pop(0)
     suggests = []
-    for index, row in four_rows_with_min.iterrows():
-        indexes.append(index)
-    
-    indexes.remove(max_matches_index)
 
-    for idx in indexes:
-        title = str(df.loc[idx, "Food"]) + " - Đặc sản " + str(df.loc[idx, "Province"])
+    for i in sorted_indices:
+        title = str(df.loc[i, "Food"]) + " - Đặc sản " + str(df.loc[i, "Province"])
         suggests.append(title)
-
-    del first_column
-    del df_sorted
-    del four_rows_with_min
     
-    predicted_food = df.loc[max_matches_index, "Food"]
-    province = df.loc[max_matches_index, "Province"]
+    predicted_food = df.loc[min_index, "Food"]
+    province = df.loc[min_index, "Province"]
     return predicted_food, province, suggests
 
 def draw_bouding_box(image, boxes, detected_cls, names):

@@ -83,16 +83,14 @@ export default {
   line-height: 5rem;
 }
 
-.sidebar--left,
+/* .sidebar--left,
 .sidebar--right {
   border: 2px solid red;
-}
+} */
 
 .img__container {
   margin-top: 1rem;
   width: 100%;
-  display: flex;
-  justify-content: center;
 }
 
 #cur-img {
