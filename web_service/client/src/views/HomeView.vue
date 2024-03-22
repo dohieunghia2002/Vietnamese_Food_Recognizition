@@ -29,6 +29,14 @@
         <p v-for="(name, index) in suggests" :key="index">{{ name }}</p>
       </v-col>
     </v-row>
+
+    <v-row :key="imagesDetectIngre.length">
+      <v-col cols="1" v-for="(cropped, index) in imagesDetectIngre" :key="index">
+        <div class="img__container">
+          <img class="img-test" :src="'data:image/jpeg;base64,' + cropped" alt="ảnh được phát hiện">
+        </div>
+      </v-col>
+    </v-row>
   </v-container>
 </template>
 
@@ -36,11 +44,12 @@
 import axios from 'axios';
 
 export default {
+
   data() {
     return {
       ingredients: [],
       ingredients_str: '',
-      imageSrc: '',
+      imagesDetectIngre: [],
       foodName: '',
       province: '',
       suggests: []
@@ -65,8 +74,7 @@ export default {
       const temp = await res.data.detected_classes
       this.ingredients = [...new Set(temp)]
       this.ingredients_str = this.ingredients.join(', ');
-      this.imageSrc = 'data:image/jpeg;base64,' + res.data.detected_image;
-      imgElement.src = this.imageSrc
+      this.imagesDetectIngre = res.data.detected_images;
       this.foodName = await res.data.food_name
       this.province = await res.data.province
       this.suggests = await res.data.suggest_others
@@ -90,6 +98,10 @@ export default {
 
 .img__container {
   margin-top: 1rem;
+  width: 100%;
+}
+
+.img__container .img-test {
   width: 100%;
 }
 

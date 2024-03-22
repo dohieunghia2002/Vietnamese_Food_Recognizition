@@ -99,7 +99,7 @@ def find_class(set_detected_ingre):
     suggests = []
 
     for i in sorted_indices:
-        title = str(df.loc[i, "Food"]) + " - Đặc sản " + str(df.loc[i, "Province"])
+        title = str(df.loc[i, "Food"]) + " - Đặc sản " + str(df.loc[i, "Province"]) + " distance = " + str(distances[i])
         suggests.append(title)
     
     predicted_food = df.loc[min_index, "Food"]
@@ -122,6 +122,13 @@ def draw_bouding_box(image, boxes, detected_cls, names):
     
     return image
 
+def crop_image(image, coordinates):
+    # coordinates of bounding box yolo x1, y1, x2, y2
+    x1, y1, x2, y2 = map(int, coordinates)
+
+    cropped_image = image[y1:y2, x1:x2]
+    return cropped_image
+
 
 @app.route('/api/predict', methods=['POST'])
 @cross_origin(origins='*')
@@ -138,20 +145,26 @@ def predict_food():
     detected_cls = results[0].boxes.cls.tolist()
     detected_normalized = results[0].boxes.cls.tolist()
 
-    img = draw_bouding_box(uploaded_file, boxes, detected_cls, names)
+    detected_images = []
+
+    for index, (box, cls) in enumerate(zip(boxes, detected_cls)):
+        cropped_image = crop_image(uploaded_file, box)
+
+        _, encoded_image = cv2.imencode('.jpg', cropped_image)
+        encoded_image = base64.b64encode(encoded_image).decode('utf-8')
+        detected_images.append(encoded_image)
+
+    # img = draw_bouding_box(uploaded_file, boxes, detected_cls, names)
 
     for i in range(len(detected_cls)):
         idx = int(detected_cls[i])
         detected_cls[i] = ingredients[idx]
         detected_normalized[i] = classes_ingre[idx]
-    
-    _, encoded_image = cv2.imencode('.jpg', img)
-    encoded_image = base64.b64encode(encoded_image).decode('utf-8')
 
     predicted_food, province, suggests = find_class(set(detected_normalized))
     
     return jsonify({
-        'detected_image': encoded_image,
+        'detected_images': detected_images,
         'detected_classes': detected_cls,
         'food_name': predicted_food,
         'suggest_others': suggests,
