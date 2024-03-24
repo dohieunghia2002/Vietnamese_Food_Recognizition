@@ -20,6 +20,14 @@ Một trong những ưu điểm lớn của YOLO so với các phương pháp tr
 
 2. Chia dữ liệu ra làm 3 phần: **train, valid, test.**
 3. Huấn luyện mô hình YOLO. Phiên bản được sử dụng là Yolov8.
+```
+yolo task=detect mode=train model=yolov8x.pt data=/content/drive/MyDrive/Computer_Vision/NLN/demo/dataset_food/cfg.yaml epochs=28
+```
+- **task:** đối số chỉ định nhiệm vụ mà mô hình sẽ thực hiện, trong trường hợp này là phát hiện vật thể.
+- **mode:** đối số chỉ định chế độ hoạt động của mô hình, ở đây là chế độ huấn luyện.
+- **model:**  đối số chỉ định mô hình cụ thể mà mô hình YOLO sử dụng. Trong trường hợp này, đó là mô hình có tên "yolov8x.pt".
+- **data:** đối số  chỉ định đường dẫn tới dữ liệu đào tạo hoặc cấu hình cần thiết cho mô hình. Trong trường hợp này, đường dẫn này dẫn tới một tệp cấu hình YAML.
+- **epochs:** đối số chỉ định số lượng epochs (vòng lặp qua toàn bộ dữ liệu đào tạo) mà mô hình sẽ được huấn luyện.
 4. Kiểm tra độ chính xác của mô hình bằng cách dự đoán phần tử mới.
 5. Một món ăn sẽ được chia gồm hai thành phần: **Nguyên liệu chính** và **Nguyên liệu phụ**. Danh sách các nguyên liệu chính và phụ sẽ được dùng xem như **Bộ luật** để dự đoán món ăn. Mô hình Yolo sẽ phát hiện đồng thời dự đoán nhãn cho các đối tượng nguyên liệu trong ảnh. Danh sách các nhãn này sẽ được so sánh với **Bộ luật** để đưa ra dự đoán tên của món ăn.
 Ảnh bộ luật:
