@@ -34,6 +34,44 @@ yolo task=detect mode=train model=yolov8x.pt data=/content/drive/MyDrive/Compute
 ![example](./example_images/excel.JPG)
 6. Triển khai mô hình thành web service. Xây dựng ứng dụng web với Backend là **Flask** và Frontend là **Vuejs, thư viện UI Vuetify.**
 
+## Cách dự đoán món ăn
+Đo khoảng cách giữa tập thành phần nguyên liệu được dự đoán với tập thành phần nguyên liệu chính + phụ của các món ăn khác.
+
+Ví dụ: Yolo phát hiện ra được tập thành phần nguyên liệu gồm **detect = {"bún", "thịt bò"}**
+
+![example](./example_images/excel.JPG)
+Xét hàng đầu tiên (Bún cá) trong bộ luật: các nguyên liệu chính gồm "bún", "cá"
+
+phần tử "bún" của detect **thuộc** bộ luật của bún cá => distance = 0
+
+phần tử "cá" của detect **không thuộc** bộ luật của bún cá => distance = 0 + 1 = 1
+
+Xét hàng thứ 2 (Hủ tiếu Nam Vang) trong bộ luật: các nguyên liệu chính gồm "hủ tiếu", "tôm", "trứng", "thịt băm"; các nguyên liệu phụ gồm "mực", "thịt heo"
+
+phần tử "bún" của detect **không thuộc** bộ luật của hủ tiếu Nam Vang => distance = 1
+
+phần tử "cá" của detect **không thuộc** bộ luật của hủ tiếu Nam Vang => distance = 1 + 1 = 2
+
+Các phần tử của detect cũng **không thuộc** thành phần nguyên liệu phụ của Hủ tiếu Nam Vang => distance không thay đổi
+
+Xét hàng thứ 3 (Hủ tiếu Mỹ Tho) trong bộ luật: các nguyên liệu chính gồm "hủ tiếu", "tôm", "thịt heo", "gan"; các nguyên liệu phụ gồm "trứng", "thịt băm", "mực"
+
+phần tử "bún" của detect **không thuộc** bộ luật của hủ tiếu Mỹ Tho => distance = 1
+
+phần tử "cá" của detect **không thuộc** bộ luật của hủ tiếu Mỹ Tho => distance = 1 + 1 = 2
+
+Các phần tử của detect cũng **không thuộc** thành phần nguyên liệu phụ của Hủ tiếu Mỹ Tho => distance không thay đổi
+
+...
+
+Xét hàng cuối cùng (Bún đậu mắm tôm) trong bộ luật: các nguyên liệu chính gồm "bún", "chả cốm", "dồi sụn", "đậu hũ", "thịt heo", "chả giò"
+
+phần tử "bún" của detect **không thuộc** bộ luật của bún đậu mắm tôm => distance = 1
+
+phần tử "cá" của detect **không thuộc** bộ luật của bún đậu mắm tôm => distance = 1 + 1 = 2
+
+### Khoảng cách giữa detect và món ăn nào có giá trị ngắn nhất (nhỏ nhất) thì đó là món ăn được dự đoán.
+
 ## Kết quả Demo:
 ![example](./example_images/test1.JPG)
 ![example](./example_images/test2.JPG)
